@@ -1423,7 +1423,7 @@ afl_fsrv_run_target(afl_forkserver_t *fsrv, u32 timeout,
     enum NyxReturnValue ret_val =
         fsrv->nyx_handlers->nyx_exec(fsrv->nyx_runner);
 
-    fsrv->total_execs++;
+//    fsrv->total_execs++;
 
     switch (ret_val) {
 
@@ -1585,7 +1585,7 @@ afl_fsrv_run_target(afl_forkserver_t *fsrv, u32 timeout,
 
   if (!WIFSTOPPED(fsrv->child_status)) { fsrv->child_pid = -1; }
 
-  fsrv->total_execs++;
+//  fsrv->total_execs++;
 
   /* Any subsequent operations on fsrv->trace_bits must not be moved by the
      compiler below this point. Past this location, fsrv->trace_bits[]
