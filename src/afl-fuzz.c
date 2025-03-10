@@ -597,6 +597,7 @@ int main(int argc, char **argv_orig, char **envp) {
   if (get_afl_env("AFL_DEBUG")) { debug = afl->debug = 1; }
 
   afl_state_init(afl, map_size);
+  afl->last_exec_time = get_cur_time_us();
   afl->debug = debug;
   afl_fsrv_init(&afl->fsrv);
   if (debug) { afl->fsrv.debug = true; }
@@ -3499,6 +3500,22 @@ stop_fuzzing:
             "Profiling information: %llu ms total work, %llu ns/run\n",
        time_spent_working / 1000000,
        time_spent_working / afl->fsrv.total_execs);
+
+  u8* profile_file = alloc_printf("%s/profiling.txt", afl->out_dir);
+  FILE* fd = fopen(profile_file, "w");
+  ck_free(profile_file);
+  if (fd == NULL)
+    FATAL("Cannot open profiling file");
+  fprintf(fd, "%llums %lluexec "
+        "fuzz %llums exec %llums %0.02fus/exec %0.02f%%\n",
+        time_spent_working / 1000000,
+        afl->fsrv.total_execs,
+        afl->fuzz_time / 1000,
+        afl->exec_time / 1000,
+        (double)afl->exec_time / afl->fsrv.total_execs / 1000,
+        (double)afl->exec_time * 100 /
+        (afl->exec_time + afl->fuzz_time));
+  fclose(fd);
   #endif
 
   if (afl->afl_env.afl_final_sync) {

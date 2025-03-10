@@ -867,6 +867,8 @@ typedef struct afl_state {
   u32   bitsmap_size;
 #endif
 
+  u64 exec_time, fuzz_time, exec_time_short, fuzz_time_short, last_exec_time;
+
 } afl_state_t;
 
 struct custom_mutator {

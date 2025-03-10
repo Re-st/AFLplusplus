@@ -58,6 +58,8 @@ fsrv_run_result_t __attribute__((hot)) fuzz_run_target(afl_state_t      *afl,
 
   }
 
+  u64 t1 = get_cur_time_us();
+  u64 fuzz_time_cur = t1 - afl->last_exec_time;
 #endif
 
   fsrv_run_result_t res = afl_fsrv_run_target(fsrv, timeout, &afl->stop_soon);
@@ -101,6 +103,18 @@ fsrv_run_result_t __attribute__((hot)) fuzz_run_target(afl_state_t      *afl,
   }
 
 #ifdef PROFILING
+  u64 t2 = get_cur_time_us();
+  u64 exec_time_cur = t2 - t1;
+  afl->last_exec_time = t2;
+
+  afl->exec_time += exec_time_cur;
+  afl->fuzz_time += fuzz_time_cur;
+  if (unlikely(afl->exec_time_short + afl->fuzz_time_short >
+      5 * 1000 * 1000)) {
+      afl->exec_time_short = afl->fuzz_time_short = 0;
+  }
+  afl->exec_time_short += exec_time_cur;
+  afl->fuzz_time_short += fuzz_time_cur;
   clock_gettime(CLOCK_REALTIME, &spec);
   time_spent_start = (spec.tv_sec * 1000000000) + spec.tv_nsec;
 #endif
